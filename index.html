@@ -1,0 +1,1490 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Aprendendo com Valentina</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sky: #EAF4FB;
+    --sky-deep: #D3EAF7;
+    --teal: #2AA9A0;
+    --teal-dark: #1D8078;
+    --coral: #FF8C6B;
+    --coral-dark: #E86F4C;
+    --sun: #FFC94D;
+    --sun-dark: #E8A800;
+    --ink: #2B3A45;
+    --ink-soft: #5A6B75;
+    --white: #FFFFFF;
+    --card-shadow: 0 10px 24px rgba(43,58,69,0.12);
+    --radius-lg: 32px;
+    --radius-md: 24px;
+    --radius-sm: 16px;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0;padding:0;height:100%;
+    font-family:'Nunito', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    background:var(--sky);
+    color:var(--ink);
+    -webkit-tap-highlight-color:transparent;
+    overscroll-behavior:none;
+  }
+  h1,h2,h3,.display{
+    font-family:'Baloo 2', system-ui, sans-serif;
+    font-weight:700;
+    margin:0;
+  }
+  button{font-family:inherit;}
+  #app{
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:20px 16px 100px;
+    position:relative;
+  }
+  .screen{
+    width:100%;
+    max-width:720px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    animation:fadeIn .35s ease;
+  }
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+  @media (prefers-reduced-motion: reduce){
+    .screen{animation:none;}
+    *{transition:none !important;animation-duration:0.001s !important;}
+  }
+
+  /* ---- Top nav bar ---- */
+  .topbar{
+    width:100%;
+    max-width:720px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    margin-bottom:18px;
+    flex-wrap:wrap;
+  }
+  .nav-btn{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    background:var(--white);
+    border:none;
+    border-radius:999px;
+    padding:14px 22px;
+    font-size:1.05rem;
+    font-weight:700;
+    color:var(--ink);
+    box-shadow:var(--card-shadow);
+    cursor:pointer;
+    min-height:56px;
+    touch-action:manipulation;
+  }
+  .nav-btn:active{transform:scale(0.96);}
+  .nav-btn.icon-only{padding:14px;width:56px;justify-content:center;}
+  .nav-spacer{flex:1;}
+
+  /* ---- Generic big button ---- */
+  .big-btn{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:12px;
+    background:var(--teal);
+    color:var(--white);
+    border:none;
+    border-radius:999px;
+    padding:22px 40px;
+    font-size:1.5rem;
+    font-weight:700;
+    font-family:'Baloo 2',sans-serif;
+    box-shadow:0 8px 0 var(--teal-dark);
+    cursor:pointer;
+    min-height:72px;
+    touch-action:manipulation;
+    transition:transform .08s ease;
+  }
+  .big-btn:active{transform:translateY(6px);box-shadow:0 2px 0 var(--teal-dark);}
+  .big-btn.coral{background:var(--coral);box-shadow:0 8px 0 var(--coral-dark);}
+  .big-btn.coral:active{box-shadow:0 2px 0 var(--coral-dark);}
+  .big-btn.sun{background:var(--sun);color:#5A4200;box-shadow:0 8px 0 var(--sun-dark);}
+  .big-btn.sun:active{box-shadow:0 2px 0 var(--sun-dark);}
+  .big-btn.small{padding:16px 28px;font-size:1.15rem;min-height:60px;box-shadow:0 6px 0 var(--teal-dark);}
+
+  /* ---- Start screen ---- */
+  .start-card{
+    background:var(--white);
+    border-radius:var(--radius-lg);
+    box-shadow:var(--card-shadow);
+    padding:48px 32px;
+    text-align:center;
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:18px;
+    margin-top:6vh;
+  }
+  .app-title{
+    font-size:2.1rem;
+    color:var(--teal-dark);
+    line-height:1.2;
+  }
+  .hello{
+    font-size:2.6rem;
+    color:var(--coral-dark);
+  }
+  .subtitle{font-size:1.3rem;color:var(--ink-soft);font-weight:600;}
+  .school-name{font-size:1rem;color:var(--ink-soft);font-weight:700;letter-spacing:.3px;}
+  .teacher-line{font-size:.95rem;color:var(--ink-soft);margin-top:8px;}
+  .star-row{font-size:1.8rem;letter-spacing:6px;}
+
+  /* ---- Menu cards ---- */
+  .menu-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:18px;
+    width:100%;
+  }
+  @media (max-width:520px){ .menu-grid{grid-template-columns:1fr;} }
+  .menu-card{
+    background:var(--white);
+    border-radius:var(--radius-lg);
+    box-shadow:var(--card-shadow);
+    padding:28px 20px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:10px;
+    text-align:center;
+    cursor:pointer;
+    border:none;
+    min-height:170px;
+    justify-content:center;
+    touch-action:manipulation;
+  }
+  .menu-card:active{transform:scale(0.97);}
+  .menu-card .emoji{font-size:3rem;}
+  .menu-card .title{font-family:'Baloo 2',sans-serif;font-size:1.25rem;color:var(--ink);}
+  .menu-card .desc{font-size:.95rem;color:var(--ink-soft);font-weight:600;}
+
+  /* ---- Activity card ---- */
+  .activity-card{
+    background:var(--white);
+    border-radius:var(--radius-lg);
+    box-shadow:var(--card-shadow);
+    padding:36px 24px;
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:22px;
+  }
+  .prompt{
+    font-family:'Baloo 2',sans-serif;
+    font-size:1.6rem;
+    text-align:center;
+    color:var(--teal-dark);
+  }
+  .stimulus{
+    font-size:5rem;
+    line-height:1;
+  }
+  .word-display{
+    font-family:'Baloo 2',sans-serif;
+    font-size:3rem;
+    letter-spacing:4px;
+    color:var(--ink);
+    background:var(--sky-deep);
+    border-radius:var(--radius-md);
+    padding:14px 28px;
+  }
+  .options-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:16px;
+    justify-content:center;
+    width:100%;
+  }
+  .option-btn{
+    background:var(--white);
+    border:4px solid var(--sky-deep);
+    border-radius:var(--radius-md);
+    padding:22px 30px;
+    font-family:'Baloo 2',sans-serif;
+    font-size:1.8rem;
+    color:var(--ink);
+    cursor:pointer;
+    min-width:110px;
+    min-height:88px;
+    box-shadow:var(--card-shadow);
+    touch-action:manipulation;
+  }
+  .option-btn:active{transform:scale(0.95);}
+  .option-btn.correct{background:#DFF6E3;border-color:#7CD68C;}
+  .option-btn.wrong{background:#FDE7E1;border-color:#F3AE96;}
+
+  .audio-btn{
+    background:var(--sun);
+    border:none;
+    border-radius:999px;
+    width:84px;height:84px;
+    font-size:2.2rem;
+    box-shadow:0 6px 0 var(--sun-dark);
+    cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    touch-action:manipulation;
+  }
+  .audio-btn:active{transform:translateY(4px);box-shadow:0 2px 0 var(--sun-dark);}
+
+  /* ---- Letter tiles (montar nome/palavra) ---- */
+  .tiles-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+    justify-content:center;
+  }
+  .letter-tile{
+    background:var(--coral);
+    color:var(--white);
+    border:none;
+    border-radius:var(--radius-sm);
+    width:64px;height:72px;
+    font-family:'Baloo 2',sans-serif;
+    font-size:2rem;
+    box-shadow:0 6px 0 var(--coral-dark);
+    cursor:pointer;
+    touch-action:manipulation;
+  }
+  .letter-tile:active{transform:translateY(4px);box-shadow:0 2px 0 var(--coral-dark);}
+  .letter-tile.used{visibility:hidden;}
+  .target-row{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    justify-content:center;
+    min-height:76px;
+  }
+  .target-slot{
+    width:56px;height:64px;
+    border-radius:14px;
+    background:var(--sky-deep);
+    border:3px dashed #B7D8EA;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Baloo 2',sans-serif;
+    font-size:1.8rem;
+    color:var(--teal-dark);
+  }
+  .target-slot.filled{border-style:solid;background:#DFF6E3;border-color:#7CD68C;}
+
+  /* ---- Feedback overlay ---- */
+  .feedback-banner{
+    font-family:'Baloo 2',sans-serif;
+    font-size:1.5rem;
+    text-align:center;
+    color:var(--teal-dark);
+    background:#DFF6E3;
+    border-radius:var(--radius-md);
+    padding:16px 24px;
+    min-height:24px;
+  }
+  .feedback-banner.hide{visibility:hidden;}
+  .feedback-banner.retry{background:#FFF3D6;color:#8A6300;}
+
+  /* ---- Tracing ---- */
+  .tracing-wrap{
+    position:relative;
+    width:100%;
+    max-width:520px;
+    aspect-ratio:1/1;
+    background:var(--sky-deep);
+    border-radius:var(--radius-md);
+    touch-action:none;
+    overflow:hidden;
+  }
+  .tracing-wrap canvas{
+    position:absolute;
+    top:0;left:0;
+    width:100%;height:100%;
+  }
+  .progress-bar-outer{
+    width:100%;
+    background:var(--sky-deep);
+    border-radius:999px;
+    height:22px;
+    overflow:hidden;
+  }
+  .progress-bar-inner{
+    height:100%;
+    background:var(--sun);
+    width:0%;
+    transition:width .2s ease;
+  }
+
+  /* ---- Evolucao ---- */
+  .evolucao-list{width:100%;display:flex;flex-direction:column;gap:14px;}
+  .evolucao-row{
+    background:var(--white);
+    border-radius:var(--radius-md);
+    box-shadow:var(--card-shadow);
+    padding:18px 22px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    flex-wrap:wrap;
+  }
+  .evolucao-row .label{font-family:'Baloo 2',sans-serif;font-size:1.2rem;}
+  .evolucao-row .stars{font-size:1.4rem;color:var(--sun-dark);letter-spacing:2px;}
+
+  /* ---- Teacher area ---- */
+  .teacher-panel{
+    background:var(--white);
+    border-radius:var(--radius-lg);
+    box-shadow:var(--card-shadow);
+    padding:28px 22px;
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+  }
+  .teacher-panel h3{font-family:'Baloo 2',sans-serif;color:var(--teal-dark);}
+  .pin-input{
+    font-size:1.6rem;
+    text-align:center;
+    letter-spacing:8px;
+    padding:14px;
+    border-radius:14px;
+    border:3px solid var(--sky-deep);
+    width:200px;
+    margin:0 auto;
+  }
+  table{width:100%;border-collapse:collapse;font-size:.95rem;}
+  th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--sky-deep);}
+  th{color:var(--ink-soft);font-size:.85rem;text-transform:uppercase;}
+  .word-manage-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--sky);border-radius:14px;padding:10px 14px;}
+  .word-manage-row input{padding:10px;border-radius:10px;border:2px solid var(--sky-deep);font-size:1rem;}
+  .word-manage-row input.txt{width:120px;text-transform:uppercase;}
+  .word-manage-row input.emoji{width:60px;text-align:center;}
+  .small-btn{
+    background:var(--teal);color:#fff;border:none;border-radius:10px;padding:10px 16px;font-weight:700;cursor:pointer;
+  }
+  .small-btn.danger{background:#E86F4C;}
+  .field-row{display:flex;flex-direction:column;gap:6px;}
+  label{font-weight:700;color:var(--ink-soft);font-size:.9rem;}
+  select,input[type=text]{font-size:1rem;padding:10px;border-radius:10px;border:2px solid var(--sky-deep);}
+
+  .footer-space{height:20px;}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+/* =========================================================
+   APRENDENDO COM VALENTINA
+   Primeira versão funcional
+   ========================================================= */
+
+const STUDENT_NAME = "VALENTINA";
+const SCHOOL = "E.E.E.F.M. ILDA FERREIRA DA FONSECA MARTINS";
+const TEACHER = "Simoni Dalcim";
+const STORAGE_KEY = "valentina_progress_v1";
+const WORDS_KEY = "valentina_words_v1";
+const SETTINGS_KEY = "valentina_settings_v1";
+
+const DEFAULT_WORDS = [
+  {id:"mae",  text:"MÃE",  emoji:"👩"},
+  {id:"pai",  text:"PAI",  emoji:"👨"},
+  {id:"casa", text:"CASA", emoji:"🏠"},
+  {id:"bola", text:"BOLA", emoji:"⚽"},
+  {id:"gato", text:"GATO", emoji:"🐱"},
+  {id:"avo",  text:"AVÓ",  emoji:"👵"},
+  {id:"amor", text:"AMOR", emoji:"❤️"},
+];
+
+// ---------- Persistence helpers ----------
+function loadJSON(key, fallback){
+  try{
+    const raw = localStorage.getItem(key);
+    if(!raw) return fallback;
+    return JSON.parse(raw);
+  }catch(e){ return fallback; }
+}
+function saveJSON(key, val){
+  try{ localStorage.setItem(key, JSON.stringify(val)); }catch(e){}
+}
+
+let words = loadJSON(WORDS_KEY, DEFAULT_WORDS);
+let progress = loadJSON(STORAGE_KEY, { stars:{ NOME:0 }, activities:{} });
+let settings = loadJSON(SETTINGS_KEY, { audioOn:true, pin:"1234", tolerance:34 });
+
+function persistAll(){
+  saveJSON(WORDS_KEY, words);
+  saveJSON(STORAGE_KEY, progress);
+  saveJSON(SETTINGS_KEY, settings);
+}
+
+function addStar(itemId){
+  const cur = progress.stars[itemId] || 0;
+  progress.stars[itemId] = Math.min(5, cur + 1);
+  persistAll();
+}
+function markActivityDone(key){
+  progress.activities[key] = (progress.activities[key]||0) + 1;
+  persistAll();
+}
+
+// ---------- Audio ----------
+function speak(text){
+  if(!settings.audioOn) return;
+  try{
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "pt-BR";
+    u.rate = 0.85;
+    u.pitch = 1.05;
+    window.speechSynthesis.speak(u);
+  }catch(e){}
+}
+
+// ---------- Utility ----------
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+function pickDistractors(pool, excludeText, count){
+  const options = pool.filter(w=>w.text!==excludeText);
+  return shuffle(options).slice(0,count);
+}
+function el(tag, cls, html){
+  const e = document.createElement(tag);
+  if(cls) e.className = cls;
+  if(html!==undefined) e.innerHTML = html;
+  return e;
+}
+
+// ---------- Router / state ----------
+const appEl = document.getElementById("app");
+let currentScreen = "start";
+let screenParams = {};
+let history_stack = [];
+
+function goTo(screen, params){
+  history_stack.push({screen: currentScreen, params: screenParams});
+  currentScreen = screen;
+  screenParams = params || {};
+  render();
+}
+function goHome(){
+  history_stack = [];
+  currentScreen = "menu";
+  screenParams = {};
+  render();
+}
+function goBack(){
+  if(history_stack.length===0){ goHome(); return; }
+  const prev = history_stack.pop();
+  currentScreen = prev.screen;
+  screenParams = prev.params;
+  render();
+}
+
+// ---------- Topbar ----------
+function renderTopbar(showBack){
+  const bar = el("div","topbar");
+  if(showBack){
+    const back = el("button","nav-btn","⬅️ Voltar");
+    back.onclick = goBack;
+    bar.appendChild(back);
+  } else {
+    bar.appendChild(el("div","nav-spacer"));
+  }
+  const home = el("button","nav-btn icon-only","🏠");
+  home.onclick = goHome;
+  bar.appendChild(el("div","nav-spacer"));
+  bar.appendChild(home);
+  const audioToggle = el("button","nav-btn icon-only", settings.audioOn ? "🔊" : "🔇");
+  audioToggle.onclick = ()=>{
+    settings.audioOn = !settings.audioOn;
+    persistAll();
+    render();
+  };
+  bar.appendChild(audioToggle);
+  return bar;
+}
+
+// ---------- SCREENS ----------
+
+function renderStart(){
+  const s = el("div","screen");
+  const card = el("div","start-card");
+  card.appendChild(el("div","app-title","APRENDENDO COM VALENTINA"));
+  card.appendChild(el("div","hello","Olá, Valentina!"));
+  card.appendChild(el("div","subtitle","Vamos aprender brincando!"));
+  card.appendChild(el("div","school-name",SCHOOL));
+  const startBtn = el("button","big-btn coral","▶ COMEÇAR");
+  startBtn.onclick = ()=>{ speak("Olá Valentina! Vamos aprender brincando."); goHome(); };
+  card.appendChild(startBtn);
+  card.appendChild(el("div","teacher-line","Professora de Educação Especial: "+TEACHER));
+  s.appendChild(card);
+  return s;
+}
+
+function renderMenu(){
+  const s = el("div","screen");
+  s.appendChild(renderTopbar(false));
+  s.appendChild(el("h1","display",""));
+  s.querySelector("h1").style.marginBottom="14px";
+  s.querySelector("h1").style.color = "var(--teal-dark)";
+  s.querySelector("h1").textContent = "O que vamos fazer hoje?";
+
+  const grid = el("div","menu-grid");
+
+  const items = [
+    {emoji:"❤️", title:"MEU NOME", desc:"Vamos aprender o seu nome.", go:"nome-menu"},
+    {emoji:"🏠", title:"MINHAS PALAVRAS", desc:"Vamos aprender palavras.", go:"palavras-menu"},
+    {emoji:"✏️", title:"VAMOS ESCREVER", desc:"Vamos treinar os movimentos.", go:"escrever-menu"},
+    {emoji:"⭐", title:"MINHA EVOLUÇÃO", desc:"Veja o que você já aprendeu.", go:"evolucao"},
+  ];
+  items.forEach(it=>{
+    const c = el("button","menu-card");
+    c.appendChild(el("div","emoji",it.emoji));
+    c.appendChild(el("div","title",it.title));
+    c.appendChild(el("div","desc",it.desc));
+    c.onclick = ()=>goTo(it.go);
+    grid.appendChild(c);
+  });
+  s.appendChild(grid);
+
+  const teacherBtn = el("button","nav-btn","👩‍🏫 Área da Professora");
+  teacherBtn.style.marginTop = "22px";
+  teacherBtn.onclick = ()=>goTo("professora");
+  s.appendChild(teacherBtn);
+
+  return s;
+}
+
+function renderNomeMenu(){
+  const s = el("div","screen");
+  s.appendChild(renderTopbar(true));
+  s.appendChild(el("h2","display","MEU NOME"));
+  const grid = el("div","menu-grid");
+  grid.style.marginTop="18px";
+  const items = [
+    {emoji:"🔎", title:"Encontre seu nome", go:"nome-encontrar"},
+    {emoji:"🔤", title:"Encontre a letra", go:"nome-letra"},
+    {emoji:"🥇", title:"Primeira letra", go:"nome-primeira-letra"},
+    {emoji:"🧩", title:"Monte seu nome", go:"nome-montar"},
+    {emoji:"➕", title:"Complete seu nome", go:"nome-completar"},
+    {emoji:"✏️", title:"Trace seu nome", go:"nome-tracar"},
+  ];
+  items.forEach(it=>{
+    const c = el("button","menu-card");
+    c.appendChild(el("div","emoji",it.emoji));
+    c.appendChild(el("div","title",it.title));
+    c.onclick = ()=>goTo(it.go);
+    grid.appendChild(c);
+  });
+  s.appendChild(grid);
+  return s;
+}
+
+function renderPalavrasMenu(){
+  const s = el("div","screen");
+  s.appendChild(renderTopbar(true));
+  s.appendChild(el("h2","display","MINHAS PALAVRAS"));
+  const grid = el("div","menu-grid");
+  grid.style.marginTop="18px";
+  words.forEach(w=>{
+    const c = el("button","menu-card");
+    c.appendChild(el("div","emoji",w.emoji));
+    c.appendChild(el("div","title",w.text));
+    c.onclick = ()=>goTo("palavra-atividades", {wordId:w.id});
+    grid.appendChild(c);
+  });
+  s.appendChild(grid);
+  return s;
+}
+
+function renderPalavraAtividades(){
+  const w = words.find(x=>x.id===screenParams.wordId);
+  const s = el("div","screen");
+  s.appendChild(renderTopbar(true));
+  s.appendChild(el("h2","display",w.emoji+" "+w.text));
+  const grid = el("div","menu-grid");
+  grid.style.marginTop="18px";
+  const items = [
+    {emoji:"🔎", title:"Encontre a palavra", go:"palavra-encontrar"},
+    {emoji:"👂", title:"Ouça e escolha", go:"palavra-ouvir"},
+    {emoji:"🧩", title:"Monte a palavra", go:"palavra-montar"},
+    {emoji:"➕", title:"Complete a palavra", go:"palavra-completar"},
+    {emoji:"✏️", title:"Trace a palavra", go:"palavra-tracar"},
+    {emoji:"🖊️", title:"Escrita livre", go:"palavra-livre"},
+  ];
+  items.forEach(it=>{
+    const c = el("button","menu-card");
+    c.appendChild(el("div","emoji",it.emoji));
+    c.appendChild(el("div","title",it.title));
+    c.onclick = ()=>goTo(it.go, {wordId:w.id});
+    grid.appendChild(c);
+  });
+  s.appendChild(grid);
+  return s;
+}
+
+function renderEscreverMenu(){
+  const s = el("div","screen");
+  s.appendChild(renderTopbar(true));
+  s.appendChild(el("h2","display","VAMOS ESCREVER"));
+  const grid = el("div","menu-grid");
+  grid.style.marginTop="18px";
+  const c1 = el("button","menu-card");
+  c1.appendChild(el("div","emoji","❤️"));
+  c1.appendChild(el("div","title","Traçar meu nome"));
+  c1.onclick = ()=>goTo("nome-tracar");
+  grid.appendChild(c1);
+
+  words.forEach(w=>{
+    const c = el("button","menu-card");
+    c.appendChild(el("div","emoji",w.emoji));
+    c.appendChild(el("div","title","Traçar "+w.text));
+    c.onclick = ()=>goTo("palavra-tracar",{wordId:w.id});
+    grid.appendChild(c);
+
+    const c2 = el("button","menu-card");
+    c2.appendChild(el("div","emoji","🖊️"));
+    c2.appendChild(el("div","title","Escrita livre: "+w.text));
+    c2.onclick = ()=>goTo("palavra-livre",{wordId:w.id});
+    grid.appendChild(c2);
+  });
+  s.appendChild(grid);
+  return s;
+}
+
+// ---- Feedback helper used by choice-based activities ----
+function makeFeedbackBanner(){
+  return el("div","feedback-banner hide","");
+}
+function showFeedback(bannerEl, success){
+  bannerEl.classList.remove("hide","retry");
+  if(success){
+    bannerEl.textContent = ["⭐ MUITO BEM!","⭐ PARABÉNS!","⭐ VOCÊ CONSEGUIU!","⭐ ÓTIMO!"][Math.floor(Math.random()*4)];
+  } else {
+    bannerEl.classList.add("retry");
+    bannerEl.textContent = "VAMOS TENTAR NOVAMENTE!";
+  }
+}
+
+// ---- Encontre seu nome ----
+function renderNomeEncontrar(){
+  const s = el("div","screen");
+  s.appendChild(renderTopbar(true));
+  const card = el("div","activity-card");
+  card.appendChild(el("div","prompt","QUAL É O SEU NOME?"));
+
+  const audioBtn = el("button","audio-btn","🔊");
+  audioBtn.onclick = ()=>speak("Qual é o seu nome?");
+  card.appendChild(audioBtn);
+
+  const options = shuffle([STUDENT_NAME, "MARIA", "ANA"]);
+  const optRow = el("div","options-row");
+  const banner = makeFeedbackBanner();
+
+  options.forEach(optText=>{
+    const b = el("button","option-btn",optText);
+    b.onclick = ()=>{
+      const correct = optText === STUDENT_NAME;
+      Array.from(optRow.children).forEach(c=>c.disabled=true);
+      b.classList.add(correct?"correct":"wrong");
+      showFeedback(banner, correct);
+      speak(correct ? "Muito bem, Valentina!" : "Vamos tentar novamente!");
+      if(correct){
+        addStar("NOME");
+        markActivityDone("nome-encontrar");
+        setTimeout(()=>{ resetActivity(); }, 1400);
+      } else {
+        setTimeout(()=>{
+          Array.from(optRow.children).forEach(c=>{c.disabled=false;c.classList.remove("wrong");});
+          banner.classList.add("hide");
+        }, 1200);
+      }
+    };
+    optRow.appendChild(b);
+  });
+
+  function resetActivity(){ render(); }
+
+  card.appendChild(optRow);
+  card.appendChild(banner);
+  s.appendChild(card);
+  speak("Qual é o seu nome?");
+  return s;
+}
+
+// ---- Monte seu nome (toque em ordem) ----
+function renderMontarSequencia(targetText, onComplete, promptLabel){
+  const s = el("div","screen");
+  s.appendChild(renderTopbar(true));
+  const card = el("div","activity-card");
+  card.appendChild(el("div","prompt", promptLabel));
+
+  const letters = targetText.split("");
+  const shuffled = shuffle(letters.map((l,i)=>({l, key:i})));
+  let nextIndex = 0;
+
+  const targetRow = el("div","target-row");
+  letters.forEach(()=>targetRow.appendChild(el("div","target-slot","")));
+
+  const tilesRow = el("div","tiles-row");
+  const banner = makeFeedbackBanner();
+
+  shuffled.forEach(item=>{
+    const tile = el("button","letter-tile", item.l);
+    tile.onclick = ()=>{
+      // touch-based, order-forgiving: place this letter in the next empty correct slot if it matches
+      if(item.l === letters[nextIndex]){
+        const slot = targetRow.children[nextIndex];
+        slot.textContent = item.l;
+        slot.classList.add("filled");
+        tile.classList.add("used");
+        tile.disabled = true;
+        nextIndex++;
+        speak(item.l);
+        if(nextIndex === letters.length){
+          showFeedback(banner, true);
+          speak("Muito bem!");
+          onComplete && onComplete();
+          setTimeout(()=>render(), 1500);
+        }
+      } else {
+        // gentle nudge, no penalty
+        tile.style.transform = "translateY(-6px)";
+        setTimeout(()=>{tile.style.transform="";}, 200);
+      }
+    };
+    tilesRow.appendChild(tile);
+  });
+
+  card.appendChild(targetRow);
+  card.appendChild(tilesRow);
+  card.appendChild(banner);
+  s.appendChild(card);
+  return s;
+}
+
+function renderNomeMontar(){
+  return renderMontarSequencia(STUDENT_NAME, ()=>{ addStar("NOME"); markActivityDone("nome-montar"); }, "MONTE SEU NOME");
+}
+function renderPalavraMontar(){
+  const w = words.find(x=>x.id===screenParams.wordId);
+  return renderMontarSequencia(w.text, ()=>{ addStar(w.id); markActivityDone("palavra-montar-"+w.id); }, "MONTE A PALAVRA: "+w.emoji);
+}
+
+// ---- Encontre a palavra (imagem -> palavra) ----
+function renderPalavraEncontrar(){
+  const w = words.find(x=>x.id===screenParams.wordId);
+  const s = el("div","screen");
+  s.appendChild(renderTopbar(true));
+  const card = el("div","activity-card");
+  card.appendChild(el("div","prompt","ONDE ESTÁ "+w.text+"?"));
+  card.appendChild(el("div","stimulus", w.emoji));
+
+  const audioBtn = el("button","audio-btn","🔊");
+  audioBtn.onclick = ()=>speak(w.text);
+  card.appendChild(audioBtn);
+
+  const distractors = pickDistractors(words, w.text, 2);
+  const options = shuffle([w, ...distractors]);
+  const optRow = el("div","options-row");
+  const banner = makeFeedbackBanner();
+
+  options.forEach(opt=>{
+    const b = el("button","option-btn",opt.text);
+    b.onclick = ()=>{
+      const correct = opt.id === w.id;
+      Array.from(optRow.children).forEach(c=>c.disabled=true);
+      b.classList.add(correct?"correct":"wrong");
+      showFeedback(banner, correct);
+      speak(correct ? "Muito bem!" : "Vamos tentar novamente!");
+      if(correct){
+        addStar(w.id);
+        markActivityDone("palavra-encontrar-"+w.id);
+        setTimeout(()=>render(), 1400);
+      } else {
+        setTimeout(()=>{
+          Array.from(optRow.children).forEach(c=>{c.disabled=false;c.classList.remove("wrong");});
+          banner.classList.add("hide");
+        }, 1200);
+      }
+    };
+    optRow.appendChild(b);
+  });
+
+  card.appendChild(optRow);
+  card.appendChild(banner);
+  s.appendChild(card);
+  speak(w.text);
+  return s;
+}
+
+// ---- Generic choice activity (texto ou emoji nas opções) ----
+function renderChoiceActivity(cfg){
+  // cfg: { promptText, stimulusHtml, options:[{label, correct, speakOnCorrect}], ttsPrompt, onCorrect, isEmojiOptions }
+  const s = el("div","screen");
+  s.appendChild(renderTopbar(true));
+  const card = el("div","activity-card");
+  card.appendChild(el("div","prompt", cfg.promptText));
+
+  if(cfg.stimulusHtml !== undefined){
+    card.appendChild(el("div","stimulus", cfg.stimulusHtml));
+  }
+  if(cfg.audioText){
+    const audioBtn = el("button","audio-btn","🔊");
+    audioBtn.onclick = ()=>speak(cfg.audioText);
+    card.appendChild(audioBtn);
+  }
+
+  const optRow = el("div","options-row");
+  const banner = makeFeedbackBanner();
+
+  cfg.options.forEach(opt=>{
+    const b = el("button","option-btn", opt.label);
+    if(cfg.isEmojiOptions) b.style.fontSize = "2.6rem";
+    b.onclick = ()=>{
+      Array.from(optRow.children).forEach(c=>c.disabled=true);
+      b.classList.add(opt.correct?"correct":"wrong");
+      showFeedback(banner, opt.correct);
+      if(opt.correct){
+        speak(opt.speakOnCorrect || "Muito bem!");
+        cfg.onCorrect && cfg.onCorrect();
+        setTimeout(()=>render(), 1500);
+      } else {
+        speak("Vamos tentar novamente!");
+        setTimeout(()=>{
+          Array.from(optRow.children).forEach(c=>{c.disabled=false;c.classList.remove("wrong");});
+          banner.classList.add("hide");
+        }, 1200);
+      }
+    };
+    optRow.appendChild(b);
+  });
+
+  card.appendChild(optRow);
+  card.appendChild(banner);
+  s.appendChild(card);
+  if(cfg.ttsPrompt) speak(cfg.ttsPrompt);
+  return s;
+}
+
+const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+function randomDistractorLetters(exclude, count){
+  const pool = ALPHABET.filter(l=>!exclude.includes(l));
+  return shuffle(pool).slice(0,count);
+}
+
+// ---- Encontre a letra (nome) ----
+function renderNomeLetra(){
+  const uniqueLetters = [...new Set(STUDENT_NAME.split(""))];
+  const target = uniqueLetters[Math.floor(Math.random()*uniqueLetters.length)];
+  const distractors = randomDistractorLetters([target], 2);
+  const options = shuffle([target, ...distractors]).map(l=>({
+    label:l, correct: l===target, speakOnCorrect: "Muito bem!"
+  }));
+  return renderChoiceActivity({
+    promptText: "ENCONTRE A LETRA "+target+".",
+    stimulusHtml: STUDENT_NAME,
+    ttsPrompt: "Encontre a letra "+target,
+    options,
+    onCorrect: ()=>{ addStar("NOME"); markActivityDone("nome-letra"); }
+  });
+}
+
+// ---- Qual é a primeira letra? (nome) ----
+function renderNomePrimeiraLetra(){
+  const target = STUDENT_NAME[0];
+  const distractors = randomDistractorLetters([target], 2);
+  const options = shuffle([target, ...distractors]).map(l=>({
+    label:l, correct: l===target, speakOnCorrect: l+" de "+STUDENT_NAME
+  }));
+  return renderChoiceActivity({
+    promptText: "QUAL É A PRIMEIRA LETRA?",
+    stimulusHtml: STUDENT_NAME,
+    ttsPrompt: "Qual é a primeira letra?",
+    options,
+    onCorrect: ()=>{ addStar("NOME"); markActivityDone("nome-primeira-letra"); }
+  });
+}
+
+// ---- Complete o nome / Complete a palavra ----
+function renderCompletar(word, itemId, activityKey){
+  const idx = 1 + Math.floor(Math.random()*(word.length-1)); // avoid blanking the very first letter
+  const target = word[idx];
+  const masked = word.split("").map((ch,i)=> i===idx ? "_" : ch).join("");
+  const distractors = randomDistractorLetters([target], 2);
+  const options = shuffle([target, ...distractors]).map(l=>({
+    label:l, correct: l===target, speakOnCorrect: word
+  }));
+  return renderChoiceActivity({
+    promptText: "COMPLETE: "+masked,
+    ttsPrompt: "Complete a palavra",
+    options,
+    onCorrect: ()=>{ addStar(itemId); markActivityDone(activityKey); }
+  });
+}
+function renderNomeCompletar(){
+  return renderCompletar(STUDENT_NAME, "NOME", "nome-completar");
+}
+function renderPalavraCompletar(){
+  const w = words.find(x=>x.id===screenParams.wordId);
+  return renderCompletar(w.text, w.id, "palavra-completar-"+w.id);
+}
+
+// ---- Ouça e escolha (áudio -> imagem) ----
+function renderPalavraOuvir(){
+  const w = words.find(x=>x.id===screenParams.wordId);
+  const distractors = pickDistractors(words, w.text, 2);
+  const options = shuffle([w, ...distractors]).map(opt=>({
+    label: opt.emoji, correct: opt.id===w.id, speakOnCorrect:"Muito bem!"
+  }));
+  return renderChoiceActivity({
+    promptText: "OUÇA E TOQUE NA IMAGEM CERTA",
+    audioText: w.text,
+    ttsPrompt: w.text,
+    isEmojiOptions: true,
+    options,
+    onCorrect: ()=>{ addStar(w.id); markActivityDone("palavra-ouvir-"+w.id); }
+  });
+}
+
+// ---- Escrita livre ----
+function renderEscritaLivre(){
+  const w = words.find(x=>x.id===screenParams.wordId);
+  const s = el("div","screen");
+  s.appendChild(renderTopbar(true));
+  const card = el("div","activity-card");
+  card.appendChild(el("div","prompt","TENTE ESCREVER:"));
+  card.appendChild(el("div","word-display", w.text));
+
+  const audioBtn = el("button","audio-btn","🔊");
+  audioBtn.onclick = ()=>speak(w.text);
+  card.appendChild(audioBtn);
+
+  const wrap = el("div","tracing-wrap");
+  const drawCanvas = document.createElement("canvas");
+  wrap.appendChild(drawCanvas);
+  card.appendChild(wrap);
+
+  const banner = makeFeedbackBanner();
+  banner.classList.remove("hide");
+  banner.textContent = "Desenhe livremente com o dedo. Não precisa ficar perfeito!";
+  card.appendChild(banner);
+
+  const btnRow = el("div","options-row");
+  const clearBtn = el("button","big-btn small sun","🔄 LIMPAR");
+  const doneBtn = el("button","big-btn small","✔ CONCLUIR");
+  btnRow.appendChild(clearBtn);
+  btnRow.appendChild(doneBtn);
+  card.appendChild(btnRow);
+  s.appendChild(card);
+
+  let W=0,H=0,DPR=1, drawing=false, lastPt=null;
+  function setup(){
+    const rect = wrap.getBoundingClientRect();
+    W=rect.width; H=rect.height; DPR = window.devicePixelRatio||1;
+    drawCanvas.width = W*DPR; drawCanvas.height = H*DPR;
+    const ctx = drawCanvas.getContext("2d");
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+  }
+  function getPos(e){
+    const rect = drawCanvas.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return {x: clientX-rect.left, y: clientY-rect.top};
+  }
+  function dot(x,y){
+    const ctx = drawCanvas.getContext("2d");
+    ctx.fillStyle="rgba(42,169,160,0.9)";
+    ctx.beginPath(); ctx.arc(x,y,9,0,Math.PI*2); ctx.fill();
+  }
+  function line(x0,y0,x1,y1){
+    const ctx = drawCanvas.getContext("2d");
+    ctx.strokeStyle="rgba(42,169,160,0.9)";
+    ctx.lineWidth=18; ctx.lineCap="round";
+    ctx.beginPath(); ctx.moveTo(x0,y0); ctx.lineTo(x1,y1); ctx.stroke();
+  }
+  function down(e){ e.preventDefault(); drawing=true; const p=getPos(e); dot(p.x,p.y); lastPt=p; }
+  function move(e){ if(!drawing) return; e.preventDefault(); const p=getPos(e); if(lastPt) line(lastPt.x,lastPt.y,p.x,p.y); lastPt=p; }
+  function up(){ drawing=false; lastPt=null; }
+
+  drawCanvas.addEventListener("pointerdown", down);
+  drawCanvas.addEventListener("pointermove", move);
+  window.addEventListener("pointerup", up);
+  drawCanvas.addEventListener("touchstart", down, {passive:false});
+  drawCanvas.addEventListener("touchmove", move, {passive:false});
+  drawCanvas.addEventListener("touchend", up);
+
+  clearBtn.onclick = ()=>{
+    const ctx = drawCanvas.getContext("2d");
+    ctx.clearRect(0,0,W,H);
+  };
+  doneBtn.onclick = ()=>{
+    addStar(w.id);
+    markActivityDone("palavra-livre-"+w.id);
+    banner.textContent = "⭐ VOCÊ CONSEGUIU!";
+    speak("Você conseguiu!");
+    setTimeout(()=>render(), 1300);
+  };
+
+  requestAnimationFrame(setup);
+  return s;
+}
+
+// ---------- TRACING ENGINE ----------
+// Renders a big letter/word as a guide, samples a grid of "guide points" from its
+// drawn shape, and marks them covered as the student's finger passes nearby with
+// a wide tolerance radius. No precision is required.
+function renderTracingScreen(targetText, itemId, activityKey, promptLabel){
+  const s = el("div","screen");
+  s.appendChild(renderTopbar(true));
+  const card = el("div","activity-card");
+  card.appendChild(el("div","prompt", promptLabel));
+
+  const progressOuter = el("div","progress-bar-outer");
+  const progressInner = el("div","progress-bar-inner");
+  progressOuter.appendChild(progressInner);
+  card.appendChild(progressOuter);
+
+  const wrap = el("div","tracing-wrap");
+  const guideCanvas = document.createElement("canvas");
+  const drawCanvas = document.createElement("canvas");
+  wrap.appendChild(guideCanvas);
+  wrap.appendChild(drawCanvas);
+  card.appendChild(wrap);
+
+  const banner = makeFeedbackBanner();
+  card.appendChild(banner);
+
+  const btnRow = el("div","options-row");
+  const repeatBtn = el("button","big-btn small sun","🔄 REPETIR");
+  const nextBtn = el("button","big-btn small","AVANÇAR ➜");
+  nextBtn.style.display = "none";
+  btnRow.appendChild(repeatBtn);
+  btnRow.appendChild(nextBtn);
+  card.appendChild(btnRow);
+
+  s.appendChild(card);
+
+  let guidePoints = [];
+  let covered = [];
+  let W=0,H=0, DPR=1;
+  const TOLERANCE = settings.tolerance || 34;
+
+  function setupCanvases(){
+    const rect = wrap.getBoundingClientRect();
+    W = rect.width; H = rect.height;
+    DPR = window.devicePixelRatio || 1;
+    [guideCanvas, drawCanvas].forEach(c=>{
+      c.width = W*DPR; c.height = H*DPR;
+      const ctx = c.getContext("2d");
+      ctx.setTransform(DPR,0,0,DPR,0,0);
+    });
+    drawGuide();
+    buildGuidePoints();
+    clearDraw();
+  }
+
+  function drawGuide(){
+    const ctx = guideCanvas.getContext("2d");
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle = "#B7D8EA";
+    const fontSize = targetText.length > 4 ? Math.min(W/(targetText.length*0.62), H*0.5) : H*0.42;
+    ctx.font = "800 "+fontSize+"px 'Baloo 2', sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(targetText, W/2, H/2);
+    // starting point marker (first letter's left area)
+    ctx.fillStyle = "#7CD68C";
+    ctx.beginPath();
+    const textWidth = ctx.measureText(targetText).width;
+    const startX = W/2 - textWidth/2 + 6;
+    ctx.arc(startX, H/2 + fontSize*0.28, 9, 0, Math.PI*2);
+    ctx.fill();
+  }
+
+  function buildGuidePoints(){
+    const ctx = guideCanvas.getContext("2d");
+    const img = ctx.getImageData(0,0,W*DPR,H*DPR).data;
+    guidePoints = [];
+    const step = Math.max(6, Math.floor(6*DPR));
+    for(let y=0; y<H*DPR; y+=step){
+      for(let x=0; x<W*DPR; x+=step){
+        const idx = (y*W*DPR + x)*4;
+        const alpha = img[idx+3];
+        if(alpha > 60){
+          guidePoints.push({x:x/DPR, y:y/DPR, hit:false});
+        }
+      }
+    }
+    covered = guidePoints;
+    updateProgress();
+  }
+
+  function clearDraw(){
+    const ctx = drawCanvas.getContext("2d");
+    ctx.clearRect(0,0,W,H);
+  }
+
+  function updateProgress(){
+    if(guidePoints.length===0) return;
+    const hitCount = guidePoints.filter(p=>p.hit).length;
+    const pct = Math.round((hitCount/guidePoints.length)*100);
+    progressInner.style.width = pct+"%";
+    return pct;
+  }
+
+  let drawing = false;
+  const drawCtx = ()=>drawCanvas.getContext("2d");
+
+  function paintDot(x,y){
+    const ctx = drawCtx();
+    ctx.fillStyle = "rgba(255,140,107,0.85)";
+    ctx.beginPath();
+    ctx.arc(x,y,10,0,Math.PI*2);
+    ctx.fill();
+  }
+  function paintLine(x0,y0,x1,y1){
+    const ctx = drawCtx();
+    ctx.strokeStyle = "rgba(255,140,107,0.85)";
+    ctx.lineWidth = 20;
+    ctx.lineCap = "round";
+    ctx.beginPath();
+    ctx.moveTo(x0,y0);
+    ctx.lineTo(x1,y1);
+    ctx.stroke();
+  }
+
+  function markCoverage(x,y){
+    let changed = false;
+    for(const p of guidePoints){
+      if(p.hit) continue;
+      const dx = p.x-x, dy = p.y-y;
+      if(dx*dx+dy*dy <= TOLERANCE*TOLERANCE){
+        p.hit = true;
+        changed = true;
+      }
+    }
+    if(changed){
+      const pct = updateProgress();
+      if(pct >= 65 && nextBtn.style.display === "none"){
+        completeTracing();
+      }
+    }
+  }
+
+  let completed = false;
+  function completeTracing(){
+    if(completed) return;
+    completed = true;
+    showFeedback(banner, true);
+    banner.textContent = "⭐ MUITO BEM!";
+    speak("Muito bem!");
+    addStar(itemId);
+    markActivityDone(activityKey);
+    nextBtn.style.display = "";
+  }
+
+  let lastPt = null;
+  function getPos(e){
+    const rect = drawCanvas.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return {x: clientX-rect.left, y: clientY-rect.top};
+  }
+  function pointerDown(e){
+    e.preventDefault();
+    drawing = true;
+    const p = getPos(e);
+    paintDot(p.x,p.y);
+    markCoverage(p.x,p.y);
+    lastPt = p;
+  }
+  function pointerMove(e){
+    if(!drawing) return;
+    e.preventDefault();
+    const p = getPos(e);
+    if(lastPt){ paintLine(lastPt.x,lastPt.y,p.x,p.y); }
+    markCoverage(p.x,p.y);
+    lastPt = p;
+  }
+  function pointerUp(e){
+    drawing = false;
+    lastPt = null;
+  }
+
+  drawCanvas.addEventListener("pointerdown", pointerDown);
+  drawCanvas.addEventListener("pointermove", pointerMove);
+  window.addEventListener("pointerup", pointerUp);
+  // touch fallbacks
+  drawCanvas.addEventListener("touchstart", pointerDown, {passive:false});
+  drawCanvas.addEventListener("touchmove", pointerMove, {passive:false});
+  drawCanvas.addEventListener("touchend", pointerUp);
+
+  repeatBtn.onclick = ()=>{
+    completed = false;
+    nextBtn.style.display = "none";
+    banner.classList.add("hide");
+    guidePoints.forEach(p=>p.hit=false);
+    updateProgress();
+    clearDraw();
+  };
+  nextBtn.onclick = ()=>{ render(); };
+
+  // Defer sizing until element is attached to DOM
+  requestAnimationFrame(()=>{ setupCanvases(); });
+
+  return s;
+}
+
+function renderNomeTracar(){
+  return renderTracingScreen(STUDENT_NAME, "NOME", "nome-tracar", "TRACE SEU NOME");
+}
+function renderPalavraTracar(){
+  const w = words.find(x=>x.id===screenParams.wordId);
+  return renderTracingScreen(w.text, w.id, "palavra-tracar-"+w.id, "TRACE A PALAVRA: "+w.emoji);
+}
+
+// ---- Evolução ----
+function renderEvolucao(){
+  const s = el("div","screen");
+  s.appendChild(renderTopbar(true));
+  s.appendChild(el("h2","display","MINHA EVOLUÇÃO"));
+  const sub = el("div","subtitle", STUDENT_NAME);
+  sub.style.marginBottom="12px";
+  s.appendChild(sub);
+
+  const list = el("div","evolucao-list");
+  const nomeStars = progress.stars["NOME"] || 0;
+  list.appendChild(makeEvoRow("❤️ Nome", nomeStars));
+  words.forEach(w=>{
+    const st = progress.stars[w.id] || 0;
+    list.appendChild(makeEvoRow(w.emoji+" "+w.text, st));
+  });
+  s.appendChild(list);
+  return s;
+}
+function makeEvoRow(label, stars){
+  const row = el("div","evolucao-row");
+  row.appendChild(el("div","label",label));
+  const starsStr = "⭐".repeat(stars) + "☆".repeat(5-stars);
+  row.appendChild(el("div","stars",starsStr));
+  return row;
+}
+
+// ---- Área da Professora ----
+let teacherUnlocked = false;
+function renderProfessora(){
+  const s = el("div","screen");
+  s.appendChild(renderTopbar(true));
+  s.appendChild(el("h2","display","ÁREA DA PROFESSORA"));
+  const sub = el("div","teacher-line","Professora de Educação Especial: "+TEACHER);
+  sub.style.margin="8px 0 18px";
+  s.appendChild(sub);
+
+  if(!teacherUnlocked){
+    const panel = el("div","teacher-panel");
+    panel.appendChild(el("h3","Digite o PIN para continuar"));
+    const input = document.createElement("input");
+    input.type="tel"; input.maxLength=4; input.className="pin-input"; input.placeholder="••••";
+    panel.appendChild(input);
+    const btn = el("button","big-btn small","ENTRAR");
+    btn.style.alignSelf="center";
+    const err = el("div","feedback-banner retry hide","PIN incorreto. Tente novamente.");
+    btn.onclick = ()=>{
+      if(input.value === settings.pin){
+        teacherUnlocked = true;
+        render();
+      } else {
+        err.classList.remove("hide");
+      }
+    };
+    panel.appendChild(btn);
+    panel.appendChild(err);
+    const hint = el("div","teacher-line","PIN padrão: 1234 (altere abaixo depois de entrar)");
+    panel.appendChild(hint);
+    s.appendChild(panel);
+    return s;
+  }
+
+  // Unlocked panel
+  const panel1 = el("div","teacher-panel");
+  panel1.appendChild(el("h3","Relatório de Acompanhamento"));
+  panel1.appendChild(el("div","teacher-line","ALUNA: "+STUDENT_NAME));
+  panel1.appendChild(el("div","teacher-line","ESCOLA: "+SCHOOL));
+  panel1.appendChild(el("div","teacher-line","PROFESSORA: "+TEACHER));
+
+  const table = document.createElement("table");
+  const thead = el("tr","");
+  ["Atividade","Estrelas","Situação"].forEach(h=>thead.appendChild(el("th","",h)));
+  table.appendChild(thead);
+
+  function statusFor(stars){
+    if(stars>=4) return "Concluído";
+    if(stars>=1) return "Em desenvolvimento";
+    return "Não iniciado";
+  }
+  const rows = [["Nome — "+STUDENT_NAME, progress.stars["NOME"]||0]];
+  words.forEach(w=> rows.push([w.text, progress.stars[w.id]||0]));
+  rows.forEach(([label,stars])=>{
+    const tr = el("tr","");
+    tr.appendChild(el("td","",label));
+    tr.appendChild(el("td","","⭐".repeat(stars)+"☆".repeat(5-stars)));
+    tr.appendChild(el("td","",statusFor(stars)));
+    table.appendChild(tr);
+  });
+  panel1.appendChild(table);
+  s.appendChild(panel1);
+
+  // Manage words
+  const panel2 = el("div","teacher-panel");
+  panel2.appendChild(el("h3","Gerenciar Palavras"));
+  words.forEach(w=>{
+    const row = el("div","word-manage-row");
+    row.appendChild(el("div","",w.emoji+" "+w.text));
+    const rm = el("button","small-btn danger","Remover");
+    rm.onclick = ()=>{
+      words = words.filter(x=>x.id!==w.id);
+      delete progress.stars[w.id];
+      persistAll();
+      render();
+    };
+    row.appendChild(rm);
+    panel2.appendChild(row);
+  });
+
+  const addRow = el("div","word-manage-row");
+  const txtInput = document.createElement("input");
+  txtInput.className="txt"; txtInput.type="text"; txtInput.placeholder="PALAVRA";
+  const emojiInput = document.createElement("input");
+  emojiInput.className="emoji"; emojiInput.type="text"; emojiInput.placeholder="🙂"; emojiInput.maxLength=4;
+  const addBtn = el("button","small-btn","Adicionar palavra");
+  addBtn.onclick = ()=>{
+    const text = txtInput.value.trim().toUpperCase();
+    const emoji = emojiInput.value.trim() || "🔤";
+    if(!text) return;
+    const id = text.toLowerCase().replace(/[^a-zà-ú0-9]/gi,"") + "-" + Date.now();
+    words.push({id, text, emoji});
+    persistAll();
+    txtInput.value=""; emojiInput.value="";
+    render();
+  };
+  addRow.appendChild(txtInput);
+  addRow.appendChild(emojiInput);
+  addRow.appendChild(addBtn);
+  panel2.appendChild(addRow);
+  s.appendChild(panel2);
+
+  // Settings
+  const panel3 = el("div","teacher-panel");
+  panel3.appendChild(el("h3","Configurações"));
+
+  const audioField = el("div","field-row");
+  audioField.appendChild(el("label","","Som"));
+  const audioSelect = document.createElement("select");
+  ["Ativado","Desativado"].forEach((opt,i)=>{
+    const o = document.createElement("option");
+    o.value = i===0?"on":"off";
+    o.textContent = opt;
+    if((settings.audioOn && i===0)||(!settings.audioOn && i===1)) o.selected=true;
+    audioSelect.appendChild(o);
+  });
+  audioSelect.onchange = ()=>{ settings.audioOn = audioSelect.value==="on"; persistAll(); };
+  audioField.appendChild(audioSelect);
+  panel3.appendChild(audioField);
+
+  const tolField = el("div","field-row");
+  tolField.appendChild(el("label","","Tolerância do traçado"));
+  const tolSelect = document.createElement("select");
+  [["Padrão (recomendado)",34],["Mais fácil",48],["Um pouco mais exigente",22]].forEach(([label,val])=>{
+    const o = document.createElement("option");
+    o.value = val; o.textContent = label;
+    if((settings.tolerance||34) === val) o.selected = true;
+    tolSelect.appendChild(o);
+  });
+  tolSelect.onchange = ()=>{ settings.tolerance = parseInt(tolSelect.value); persistAll(); };
+  tolField.appendChild(tolSelect);
+  panel3.appendChild(tolField);
+
+  const pinField = el("div","field-row");
+  pinField.appendChild(el("label","","Alterar PIN (4 dígitos)"));
+  const pinInput = document.createElement("input");
+  pinInput.type="text"; pinInput.maxLength=4; pinInput.value=settings.pin;
+  pinInput.onchange = ()=>{
+    if(/^\d{4}$/.test(pinInput.value)){ settings.pin = pinInput.value; persistAll(); }
+  };
+  pinField.appendChild(pinInput);
+  panel3.appendChild(pinField);
+
+  const resetBtn = el("button","small-btn danger","Reiniciar progresso da aluna");
+  resetBtn.style.marginTop="8px";
+  resetBtn.onclick = ()=>{
+    progress = { stars:{NOME:0}, activities:{} };
+    persistAll();
+    render();
+  };
+  panel3.appendChild(resetBtn);
+
+  const lockBtn = el("button","small-btn","Sair da Área da Professora");
+  lockBtn.onclick = ()=>{ teacherUnlocked=false; goHome(); };
+  panel3.appendChild(lockBtn);
+
+  s.appendChild(panel3);
+  return s;
+}
+
+// ---------- Main render dispatcher ----------
+const SCREENS = {
+  "start": renderStart,
+  "menu": renderMenu,
+  "nome-menu": renderNomeMenu,
+  "nome-encontrar": renderNomeEncontrar,
+  "nome-letra": renderNomeLetra,
+  "nome-primeira-letra": renderNomePrimeiraLetra,
+  "nome-montar": renderNomeMontar,
+  "nome-completar": renderNomeCompletar,
+  "nome-tracar": renderNomeTracar,
+  "palavras-menu": renderPalavrasMenu,
+  "palavra-atividades": renderPalavraAtividades,
+  "palavra-encontrar": renderPalavraEncontrar,
+  "palavra-ouvir": renderPalavraOuvir,
+  "palavra-montar": renderPalavraMontar,
+  "palavra-completar": renderPalavraCompletar,
+  "palavra-tracar": renderPalavraTracar,
+  "palavra-livre": renderEscritaLivre,
+  "escrever-menu": renderEscreverMenu,
+  "evolucao": renderEvolucao,
+  "professora": renderProfessora,
+};
+
+function render(){
+  appEl.innerHTML = "";
+  const fn = SCREENS[currentScreen] || renderMenu;
+  appEl.appendChild(fn());
+}
+
+render();
+</script>
+</body>
+</html>
