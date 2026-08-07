@@ -1110,15 +1110,27 @@ function renderTracingScreen(targetText, itemId, activityKey, promptLabel){
     const ctx = guideCanvas.getContext("2d");
     ctx.clearRect(0,0,W,H);
     ctx.fillStyle = "#B7D8EA";
-    const fontSize = targetText.length > 4 ? Math.min(W/(targetText.length*0.62), H*0.5) : H*0.42;
-    ctx.font = "800 "+fontSize+"px 'Baloo 2', sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
+
+    // Start from a generous size, then measure and shrink until the text
+    // actually fits inside the canvas (with padding), so longer/wider
+    // words like "AMOR" never get cut off.
+    const maxWidth = W * 0.86;
+    const maxHeight = H * 0.5;
+    let fontSize = maxHeight;
+    ctx.font = "800 "+fontSize+"px 'Baloo 2', sans-serif";
+    let textWidth = ctx.measureText(targetText).width;
+    while(textWidth > maxWidth && fontSize > 10){
+      fontSize -= 2;
+      ctx.font = "800 "+fontSize+"px 'Baloo 2', sans-serif";
+      textWidth = ctx.measureText(targetText).width;
+    }
+
     ctx.fillText(targetText, W/2, H/2);
     // starting point marker (first letter's left area)
     ctx.fillStyle = "#7CD68C";
     ctx.beginPath();
-    const textWidth = ctx.measureText(targetText).width;
     const startX = W/2 - textWidth/2 + 6;
     ctx.arc(startX, H/2 + fontSize*0.28, 9, 0, Math.PI*2);
     ctx.fill();
@@ -1254,6 +1266,11 @@ function renderTracingScreen(targetText, itemId, activityKey, promptLabel){
 
   // Defer sizing until element is attached to DOM
   requestAnimationFrame(()=>{ setupCanvases(); });
+  // Redraw once the custom font is fully loaded, so text-width measurements
+  // (used to size and center the guide letters/words) are accurate.
+  if(document.fonts && document.fonts.ready){
+    document.fonts.ready.then(()=>{ setupCanvases(); });
+  }
 
   return s;
 }
