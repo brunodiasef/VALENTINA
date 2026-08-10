@@ -129,24 +129,23 @@
     background:var(--white);
     border-radius:var(--radius-lg);
     box-shadow:var(--card-shadow);
-    padding:48px 32px;
+    padding:36px 28px;
     text-align:center;
     width:100%;
     display:flex;
     flex-direction:column;
     align-items:center;
-    gap:18px;
+    gap:14px;
     margin-top:6vh;
-    position:relative;
-    overflow:hidden;
   }
-  .start-card-bg{
-    position:absolute;
-    inset:0;
+  .start-card-photo{
+    width:100%;
+    max-width:260px;
+    aspect-ratio:1/1;
+    border-radius:var(--radius-md);
     background-size:cover;
     background-position:center;
-    opacity:0.16;
-    z-index:0;
+    opacity:0.32;
   }
   .start-card-content{
     position:relative;
@@ -154,18 +153,18 @@
     display:flex;
     flex-direction:column;
     align-items:center;
-    gap:18px;
+    gap:10px;
   }
   .app-title{
-    font-size:2.1rem;
+    font-size:1.7rem;
     color:var(--teal-dark);
     line-height:1.2;
   }
   .hello{
-    font-size:2.6rem;
+    font-size:2.1rem;
     color:var(--coral-dark);
   }
-  .subtitle{font-size:1.3rem;color:var(--ink-soft);font-weight:600;}
+  .subtitle{font-size:1.1rem;color:var(--ink-soft);font-weight:600;}
   .school-name{font-size:1rem;color:var(--ink-soft);font-weight:700;letter-spacing:.3px;}
   .teacher-line{font-size:.95rem;color:var(--ink-soft);margin-top:8px;}
   .star-row{font-size:1.8rem;letter-spacing:6px;}
@@ -589,19 +588,28 @@ function ensureVoiceReady(){
 ensureVoiceReady();
 
 function speak(text){
-  if(!settings.audioOn) return;
-  try{
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = "pt-BR";
-    u.rate = 0.85;
-    u.pitch = 1.15;
-    const voice = cachedVoice || pickFemalePtVoice();
-    if(voice){ u.voice = voice; cachedVoice = voice; }
-    window.speechSynthesis.speak(u);
-  }catch(e){}
+  if(!settings.audioOn) return Promise.resolve();
+  return new Promise((resolve)=>{
+    try{
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = "pt-BR";
+      u.rate = 0.85;
+      u.pitch = 1.15;
+      const voice = cachedVoice || pickFemalePtVoice();
+      if(voice){ u.voice = voice; cachedVoice = voice; }
+      u.onend = ()=>resolve();
+      u.onerror = ()=>resolve();
+      window.speechSynthesis.speak(u);
+    }catch(e){ resolve(); }
+  });
 }
 function stopSpeaking(){
   try{ window.speechSynthesis.cancel(); }catch(e){}
+}
+// Small pause after speech ends (or, if audio is off, a longer pause so
+// the on-screen feedback text still has time to be read) before moving on.
+function afterFeedbackPause(){
+  return new Promise((resolve)=> setTimeout(resolve, settings.audioOn ? 450 : 1000));
 }
 
 // ---------- Utility ----------
@@ -683,16 +691,16 @@ function renderTopbar(showBack){
 function renderStart(){
   const s = el("div","screen");
   const card = el("div","start-card");
-  const bg = el("div","start-card-bg");
-  bg.style.backgroundImage = "url('"+STUDENT_PHOTO+"')";
-  card.appendChild(bg);
+  const photo = el("div","start-card-photo");
+  photo.style.backgroundImage = "url('"+STUDENT_PHOTO+"')";
+  card.appendChild(photo);
   const content = el("div","start-card-content");
   content.appendChild(el("div","app-title","A.B.C. DA VALENTINA"));
   content.appendChild(el("div","hello","Olá, Valentina!"));
   content.appendChild(el("div","subtitle","Vamos aprender brincando!"));
   content.appendChild(el("div","school-name",SCHOOL));
   const startBtn = el("button","big-btn coral","▶ COMEÇAR");
-  startBtn.onclick = ()=>{ speak("Olá Valentina! Vamos aprender brincando."); goHome(); };
+  startBtn.onclick = async ()=>{ await speak("Olá Valentina! Vamos aprender brincando."); goHome(); };
   content.appendChild(startBtn);
 
   if(!appIsInstalled && !isStandaloneDisplay()){
@@ -883,21 +891,20 @@ function renderNomeEncontrar(){
 
   options.forEach(optText=>{
     const b = el("button","option-btn",optText);
-    b.onclick = ()=>{
+    b.onclick = async ()=>{
       const correct = optText === STUDENT_NAME;
       Array.from(optRow.children).forEach(c=>c.disabled=true);
       b.classList.add(correct?"correct":"wrong");
       showFeedback(banner, correct);
-      speak(correct ? "Muito bem, Valentina!" : "Vamos tentar novamente!");
+      await speak(correct ? "Muito bem, Valentina!" : "Vamos tentar novamente!");
+      await afterFeedbackPause();
       if(correct){
         addStar("NOME");
         markActivityDone("nome-encontrar");
-        setTimeout(()=>{ resetActivity(); }, 1400);
+        resetActivity();
       } else {
-        setTimeout(()=>{
-          Array.from(optRow.children).forEach(c=>{c.disabled=false;c.classList.remove("wrong");});
-          banner.classList.add("hide");
-        }, 1200);
+        Array.from(optRow.children).forEach(c=>{c.disabled=false;c.classList.remove("wrong");});
+        banner.classList.add("hide");
       }
     };
     optRow.appendChild(b);
@@ -931,7 +938,7 @@ function renderMontarSequencia(targetText, onComplete, promptLabel){
 
   shuffled.forEach(item=>{
     const tile = el("button","letter-tile", item.l);
-    tile.onclick = ()=>{
+    tile.onclick = async ()=>{
       // touch-based, order-forgiving: place this letter in the next empty correct slot if it matches
       if(item.l === letters[nextIndex]){
         const slot = targetRow.children[nextIndex];
@@ -940,12 +947,13 @@ function renderMontarSequencia(targetText, onComplete, promptLabel){
         tile.classList.add("used");
         tile.disabled = true;
         nextIndex++;
-        speak(item.l);
+        await speak(item.l.toLowerCase());
         if(nextIndex === letters.length){
           showFeedback(banner, true);
-          speak("Muito bem!");
+          await speak("Muito bem!");
           onComplete && onComplete();
-          setTimeout(()=>render(), 1500);
+          await afterFeedbackPause();
+          render();
         }
       } else {
         // gentle nudge, no penalty
@@ -991,21 +999,20 @@ function renderPalavraEncontrar(){
 
   options.forEach(opt=>{
     const b = el("button","option-btn",opt.text);
-    b.onclick = ()=>{
+    b.onclick = async ()=>{
       const correct = opt.id === w.id;
       Array.from(optRow.children).forEach(c=>c.disabled=true);
       b.classList.add(correct?"correct":"wrong");
       showFeedback(banner, correct);
-      speak(correct ? "Muito bem!" : "Vamos tentar novamente!");
+      await speak(correct ? "Muito bem!" : "Vamos tentar novamente!");
+      await afterFeedbackPause();
       if(correct){
         addStar(w.id);
         markActivityDone("palavra-encontrar-"+w.id);
-        setTimeout(()=>render(), 1400);
+        render();
       } else {
-        setTimeout(()=>{
-          Array.from(optRow.children).forEach(c=>{c.disabled=false;c.classList.remove("wrong");});
-          banner.classList.add("hide");
-        }, 1200);
+        Array.from(optRow.children).forEach(c=>{c.disabled=false;c.classList.remove("wrong");});
+        banner.classList.add("hide");
       }
     };
     optRow.appendChild(b);
@@ -1043,23 +1050,23 @@ function renderChoiceActivity(cfg){
     const b = el("button","option-btn", opt.label);
     if(cfg.isEmojiOptions) b.style.fontSize = "2.6rem";
     if(cfg.isLetterOptions) b.classList.add("big-letter");
-    b.onclick = ()=>{
+    b.onclick = async ()=>{
       Array.from(optRow.children).forEach(c=>c.disabled=true);
       b.classList.add(opt.correct?"correct":"wrong");
       showFeedback(banner, opt.correct);
       const speakLetterMode = cfg.speakLetterBeforeFeedback || "never";
       if(opt.correct){
-        if(speakLetterMode === "always") speak(opt.label.toLowerCase());
-        speak(opt.speakOnCorrect || "Muito bem!");
+        if(speakLetterMode === "always") await speak(opt.label.toLowerCase());
+        await speak(opt.speakOnCorrect || "Muito bem!");
         cfg.onCorrect && cfg.onCorrect();
-        setTimeout(()=>render(), 1500);
+        await afterFeedbackPause();
+        render();
       } else {
-        if(speakLetterMode === "always" || speakLetterMode === "onWrong") speak(opt.label.toLowerCase());
-        speak("Vamos tentar novamente!");
-        setTimeout(()=>{
-          Array.from(optRow.children).forEach(c=>{c.disabled=false;c.classList.remove("wrong");});
-          banner.classList.add("hide");
-        }, 1200);
+        if(speakLetterMode === "always" || speakLetterMode === "onWrong") await speak(opt.label.toLowerCase());
+        await speak("Vamos tentar novamente!");
+        await afterFeedbackPause();
+        Array.from(optRow.children).forEach(c=>{c.disabled=false;c.classList.remove("wrong");});
+        banner.classList.add("hide");
       }
     };
     optRow.appendChild(b);
@@ -1227,12 +1234,13 @@ function renderEscritaLivre(){
     const ctx = drawCanvas.getContext("2d");
     ctx.clearRect(0,0,W,H);
   };
-  doneBtn.onclick = ()=>{
+  doneBtn.onclick = async ()=>{
     addStar(w.id);
     markActivityDone("palavra-livre-"+w.id);
     banner.textContent = "⭐ VOCÊ CONSEGUIU!";
-    speak("Você conseguiu!");
-    setTimeout(()=>render(), 1300);
+    await speak("Você conseguiu!");
+    await afterFeedbackPause();
+    render();
   };
 
   requestAnimationFrame(setup);
