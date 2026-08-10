@@ -1049,12 +1049,12 @@ function renderChoiceActivity(cfg){
       showFeedback(banner, opt.correct);
       const speakLetterMode = cfg.speakLetterBeforeFeedback || "never";
       if(opt.correct){
-        if(speakLetterMode === "always") speak(opt.label);
+        if(speakLetterMode === "always") speak(opt.label.toLowerCase());
         speak(opt.speakOnCorrect || "Muito bem!");
         cfg.onCorrect && cfg.onCorrect();
         setTimeout(()=>render(), 1500);
       } else {
-        if(speakLetterMode === "always" || speakLetterMode === "onWrong") speak(opt.label);
+        if(speakLetterMode === "always" || speakLetterMode === "onWrong") speak(opt.label.toLowerCase());
         speak("Vamos tentar novamente!");
         setTimeout(()=>{
           Array.from(optRow.children).forEach(c=>{c.disabled=false;c.classList.remove("wrong");});
@@ -1102,7 +1102,7 @@ function renderNomePrimeiraLetra(){
   const target = STUDENT_NAME[0];
   const distractors = randomDistractorLetters([target], 2);
   const options = shuffle([target, ...distractors]).map(l=>({
-    label:l, correct: l===target, speakOnCorrect: l+" de "+STUDENT_NAME
+    label:l, correct: l===target, speakOnCorrect: l.toLowerCase()+" de "+STUDENT_NAME
   }));
   return renderChoiceActivity({
     promptText: "QUAL É A PRIMEIRA LETRA?",
