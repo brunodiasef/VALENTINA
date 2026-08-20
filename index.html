@@ -566,30 +566,44 @@ function markActivityDone(key){
 // ---------- Audio ----------
 let cachedVoice = null;
 function pickFemalePtVoice(){
-  const voices = window.speechSynthesis.getVoices() || [];
-  if(voices.length===0) return null;
-  const pt = voices.filter(v => v.lang && v.lang.toLowerCase().startsWith("pt"));
-  const pool = pt.length ? pt : voices;
-  const femaleNamePattern = /maria|luciana|joana|helena|camila|fernanda|female|mulher|feminin|woman|samantha|vitoria|vitória/i;
-  let voice = pool.find(v => femaleNamePattern.test(v.name));
-  if(!voice) voice = pt.find(v => v.lang.toLowerCase()==="pt-br");
-  if(!voice) voice = pt[0];
-  return voice || null;
+  try{
+    if(!window.speechSynthesis) return null;
+    const voices = window.speechSynthesis.getVoices() || [];
+    if(voices.length===0) return null;
+    const pt = voices.filter(v => v.lang && v.lang.toLowerCase().startsWith("pt"));
+    const pool = pt.length ? pt : voices;
+    const femaleNamePattern = /maria|luciana|joana|helena|camila|fernanda|female|mulher|feminin|woman|samantha|vitoria|vitória/i;
+    let voice = pool.find(v => femaleNamePattern.test(v.name));
+    if(!voice) voice = pt.find(v => v.lang.toLowerCase()==="pt-br");
+    if(!voice) voice = pt[0];
+    return voice || null;
+  }catch(e){ return null; }
 }
 function ensureVoiceReady(){
-  const existing = window.speechSynthesis.getVoices();
-  if(existing && existing.length){
-    cachedVoice = pickFemalePtVoice();
-  }
-  window.speechSynthesis.onvoiceschanged = ()=>{
-    cachedVoice = pickFemalePtVoice();
-  };
+  try{
+    if(!window.speechSynthesis) return;
+    const existing = window.speechSynthesis.getVoices();
+    if(existing && existing.length){
+      cachedVoice = pickFemalePtVoice();
+    }
+    window.speechSynthesis.onvoiceschanged = ()=>{
+      cachedVoice = pickFemalePtVoice();
+    };
+  }catch(e){}
 }
 ensureVoiceReady();
 
 function speak(text){
   if(!settings.audioOn) return Promise.resolve();
+  if(!window.speechSynthesis) return Promise.resolve();
   return new Promise((resolve)=>{
+    let settled = false;
+    const finish = ()=>{ if(settled) return; settled = true; resolve(); };
+    // Safety net: on some devices (e.g. managed school Chromebooks with no
+    // TTS engine/voice installed) speechSynthesis silently does nothing and
+    // never fires onend/onerror, which would otherwise leave callers stuck
+    // waiting forever (e.g. the start button never advancing).
+    const safetyTimer = setTimeout(finish, 4000);
     try{
       const u = new SpeechSynthesisUtterance(text);
       u.lang = "pt-BR";
@@ -597,10 +611,10 @@ function speak(text){
       u.pitch = 1.15;
       const voice = cachedVoice || pickFemalePtVoice();
       if(voice){ u.voice = voice; cachedVoice = voice; }
-      u.onend = ()=>resolve();
-      u.onerror = ()=>resolve();
+      u.onend = ()=>{ clearTimeout(safetyTimer); finish(); };
+      u.onerror = ()=>{ clearTimeout(safetyTimer); finish(); };
       window.speechSynthesis.speak(u);
-    }catch(e){ resolve(); }
+    }catch(e){ clearTimeout(safetyTimer); finish(); }
   });
 }
 function stopSpeaking(){
