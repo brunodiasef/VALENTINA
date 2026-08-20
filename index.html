@@ -515,22 +515,25 @@ function setupPWA(){
 
     if("serviceWorker" in navigator){
       const swCode = "" +
-        "const CACHE_NAME = 'abc-valentina-v1';" +
-        "self.addEventListener('install', (event) => {" +
-        "  self.skipWaiting();" +
-        "  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.add(self.registration.scope)));" +
+        "const CACHE_NAME = 'abc-valentina-v2';" +
+        "self.addEventListener('install', (event) => { self.skipWaiting(); });" +
+        "self.addEventListener('activate', (event) => {" +
+        "  event.waitUntil(" +
+        "    caches.keys().then((keys) => Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k))))" +
+        "  );" +
+        "  self.clients.claim();" +
         "});" +
-        "self.addEventListener('activate', (event) => { self.clients.claim(); });" +
         "self.addEventListener('fetch', (event) => {" +
         "  if(event.request.method !== 'GET') return;" +
+        // Network-first: always prefer the freshest deployed version when
+        // online (so updates/bug fixes reach every device immediately),
+        // and only fall back to the cached copy when the network fails
+        // (offline use).
         "  event.respondWith(" +
-        "    caches.match(event.request).then((cached) => {" +
-        "      const fetchPromise = fetch(event.request).then((networkResponse) => {" +
-        "        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, networkResponse.clone()));" +
-        "        return networkResponse;" +
-        "      }).catch(() => cached);" +
-        "      return cached || fetchPromise;" +
-        "    })" +
+        "    fetch(event.request).then((networkResponse) => {" +
+        "      caches.open(CACHE_NAME).then((cache) => cache.put(event.request, networkResponse.clone()));" +
+        "      return networkResponse;" +
+        "    }).catch(() => caches.match(event.request))" +
         "  );" +
         "});";
       const swBlob = new Blob([swCode], {type:"application/javascript"});
